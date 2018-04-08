@@ -1,0 +1,87 @@
+---
+title: "coursera_ml_project"
+author: "Abhishek Dubey"
+date: "4/8/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(caret)
+library(dplyr)
+library(knitr)
+library(rpart)
+```
+## Introduction
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. In this project, goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. The goal of project is to predict the manner in which participants did the exercise. This is the "classe" variable in the training set. We will be using different classification models and will use model with best accuracy to predict the values on test dataset.
+
+## Data Pre-Processing
+```{r}
+setwd("/Users/abhishekdubey/Desktop/Learning/Coursera/Practical_Machine_Learning/coursera_ml_project")
+training <- read.csv("pml-training.csv")
+testing <- read.csv("pml-testing.csv")
+
+# Partition the training dataset into "Training" & "Validation"
+inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)
+trainingData <- training[inTrain, ]
+validationData  <- training[-inTrain, ]
+dim(trainingData)
+dim(validationData)
+```
+
+#### Data Cleaning- Remove records with Near Zero Variance & records with NAs, Remove Identification records
+```{r}
+#Remove Near Zero Variance Columns
+near.zero.var <- nearZeroVar(training)
+trainingData <- trainingData[, -near.zero.var]
+validationData <- validationData[, -near.zero.var]
+dim(trainingData)
+dim(validationData)
+
+#Remove Columns that are largely NAs 
+all.na <- sapply(trainingData, function(x) mean(is.na(x))) > 0.95
+trainingData <- trainingData[, all.na==FALSE]
+validationData  <- validationData[, all.na==FALSE]
+dim(trainingData)
+dim(validationData)
+
+#Remove identification only variables (columns 1 to 5)
+trainingData <- trainingData[, -(1:5)]
+validationData <- validationData[, -(1:5)]
+dim(trainingData)
+dim(validationData)
+```
+
+## Prediction Model Building
+### Method: Generalized Boosted Model
+# model fit
+```{r}
+set.seed(13434)
+modFit.gbm <- train(classe ~ ., data=trainingData, method = "gbm",
+                    trControl = trainControl(method = "repeatedcv", number = 5, repeats = 1), 
+                    verbose = FALSE)
+modFit.gbm$finalModel
+
+# Prediction on Validation dataset
+predict.gbm <- predict(modFit.gbm, newdata=validationData)
+confusionMatrix.gbm <- confusionMatrix(predict.gbm, validationData$classe)
+confusionMatrix.gbm
+```
+
+### Method: Random Forest
+```{r}
+set.seed(13434)
+modFit.rf <- train(classe ~ ., data=trainingData, method="rf",
+                    trControl=trainControl(method="cv", number=3, verboseIter=FALSE))
+modFit.rf$finalModel
+
+# Prediction on Validation dataset
+predict.rf <- predict(modFit.rf, newdata=validationData)
+confusionMatrix.rf <- confusionMatrix(predict.rf, validationData$classe)
+confusionMatrix.rf
+```
