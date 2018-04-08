@@ -189,7 +189,7 @@ dim(trainingData)</code></pre>
 </div>
 <div id="model-fit" class="section level1">
 <h1>model fit</h1>
-<pre class="r"><code>set.seed(12345)
+<pre class="r"><code>set.seed(13434)
 modFit.gbm &lt;- train(classe ~ ., data=trainingData, method = &quot;gbm&quot;,
                     trControl = trainControl(method = &quot;repeatedcv&quot;, number = 5, repeats = 1), 
                     verbose = FALSE)
@@ -205,33 +205,98 @@ confusionMatrix.gbm</code></pre>
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1669   12    0    0    1
-##          B    5 1119    8    6    7
-##          C    0    7 1015   11    4
-##          D    0    1    3  941   18
-##          E    0    0    0    6 1052
+##          A 1666    8    0    3    0
+##          B    7 1109    8    2    5
+##          C    0   21 1013   12    4
+##          D    1    1    4  947   15
+##          E    0    0    1    0 1058
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9849          
-##                  95% CI : (0.9814, 0.9878)
+##                Accuracy : 0.9844          
+##                  95% CI : (0.9809, 0.9874)
 ##     No Information Rate : 0.2845          
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
 ##                                           
-##                   Kappa : 0.9809          
+##                   Kappa : 0.9802          
 ##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9970   0.9824   0.9893   0.9761   0.9723
-## Specificity            0.9969   0.9945   0.9955   0.9955   0.9988
-## Pos Pred Value         0.9923   0.9773   0.9788   0.9772   0.9943
-## Neg Pred Value         0.9988   0.9958   0.9977   0.9953   0.9938
+## Sensitivity            0.9952   0.9737   0.9873   0.9824   0.9778
+## Specificity            0.9974   0.9954   0.9924   0.9957   0.9998
+## Pos Pred Value         0.9934   0.9805   0.9648   0.9783   0.9991
+## Neg Pred Value         0.9981   0.9937   0.9973   0.9965   0.9950
 ## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
-## Detection Rate         0.2836   0.1901   0.1725   0.1599   0.1788
-## Detection Prevalence   0.2858   0.1946   0.1762   0.1636   0.1798
-## Balanced Accuracy      0.9970   0.9885   0.9924   0.9858   0.9855</code></pre>
+## Detection Rate         0.2831   0.1884   0.1721   0.1609   0.1798
+## Detection Prevalence   0.2850   0.1922   0.1784   0.1645   0.1799
+## Balanced Accuracy      0.9963   0.9845   0.9899   0.9890   0.9888</code></pre>
+<div id="method-random-forest" class="section level3">
+<h3>Method: Random Forest</h3>
+<pre class="r"><code>set.seed(13434)
+modFit.rf &lt;- train(classe ~ ., data=trainingData, method=&quot;rf&quot;,
+                    trControl=trainControl(method=&quot;cv&quot;, number=3, verboseIter=FALSE))
+modFit.rf$finalModel</code></pre>
+<pre><code>## 
+## Call:
+##  randomForest(x = x, y = y, mtry = param$mtry) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 27
+## 
+##         OOB estimate of  error rate: 0.24%
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 3906    0    0    0    0 0.000000000
+## B    7 2649    1    1    0 0.003386005
+## C    0    5 2391    0    0 0.002086811
+## D    0    0   13 2239    0 0.005772647
+## E    0    1    0    5 2519 0.002376238</code></pre>
+<pre class="r"><code># Prediction on Validation dataset
+predict.rf &lt;- predict(modFit.rf, newdata=validationData)
+confusionMatrix.rf &lt;- confusionMatrix(predict.rf, validationData$classe)
+confusionMatrix.rf</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1673    2    0    0    0
+##          B    1 1129    3    0    0
+##          C    0    8 1022    1    0
+##          D    0    0    1  963    9
+##          E    0    0    0    0 1073
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.9958          
+##                  95% CI : (0.9937, 0.9972)
+##     No Information Rate : 0.2845          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9946          
+##  Mcnemar's Test P-Value : NA              
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9994   0.9912   0.9961   0.9990   0.9917
+## Specificity            0.9995   0.9992   0.9981   0.9980   1.0000
+## Pos Pred Value         0.9988   0.9965   0.9913   0.9897   1.0000
+## Neg Pred Value         0.9998   0.9979   0.9992   0.9998   0.9981
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2843   0.1918   0.1737   0.1636   0.1823
+## Detection Prevalence   0.2846   0.1925   0.1752   0.1653   0.1823
+## Balanced Accuracy      0.9995   0.9952   0.9971   0.9985   0.9958</code></pre>
+</div>
+<div id="apply-best-model-to-test-dataset" class="section level2">
+<h2>Apply Best Model to Test Dataset</h2>
+<p>The accuracy of Random Forest model is highest and is &gt;99%. We will predict values on Test dataset from Random Forest Model.</p>
+<pre class="r"><code>predict.final &lt;- predict(modFit.rf, newdata=testing)
+predict.final</code></pre>
+<pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E</code></pre>
+</div>
 </div>
 
 
