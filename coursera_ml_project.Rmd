@@ -85,3 +85,11 @@ predict.rf <- predict(modFit.rf, newdata=validationData)
 confusionMatrix.rf <- confusionMatrix(predict.rf, validationData$classe)
 confusionMatrix.rf
 ```
+
+## Apply Best Model to Test Dataset
+The accuracy of Random Forest model is highest and is >99%. We will predict values on Test dataset from Random Forest Model.
+
+```{r}
+predict.final <- predict(modFit.rf, newdata=testing)
+predict.final
+```
